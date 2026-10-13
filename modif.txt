@@ -1,0 +1,62 @@
+CREATE OR REPLACE FORCE VIEW "AKOHO"."TRIAGEBATPARQUETDETAIL_LIB" ("ID", "IDMERE", "IDBATIMENT", "IDPARQUET", "IDSEXE", "IDQUALITE", "QTE", "IDBATIMENTLIB", "IDPARQUETLIB", "IDSEXELIB", "IDQUALITELIB", "IDLOT", "SANTE") AS 
+  SELECT d."ID",d."IDMERE",d."IDBATIMENT",d."IDPARQUET",d."IDSEXE",d."IDQUALITE",d."QTE",
+       b."NOMBATIMENT"  AS "IDBATIMENTLIB",
+       p."VAL"  AS "IDPARQUETLIB",
+       sx."VAL" AS "IDSEXELIB",
+       q."VAL"  AS "IDQUALITELIB",
+    	t.idlot AS idlot,
+    	d."SANTE"
+FROM "TRIAGEBATIMENTPARQUETDETAIL" d
+         LEFT JOIN "BATIMENT" b ON b."ID" = d."IDBATIMENT"
+         LEFT JOIN "PARQUET" p ON p."ID" = d."IDPARQUET"
+         LEFT JOIN "SEXE" sx ON sx."ID" = d."IDSEXE"
+         LEFT JOIN "QUALITEPOUSSIN" q ON q."ID" = d."IDQUALITE"
+		LEFT JOIN TRIAGEBATIMENTPARQUET t ON t.id=d.idmere;
+        
+-----------------------------------------------------------------------        
+
+CREATE OR REPLACE FORCE VIEW "AKOHO"."V_PARQUET_RECAP"
+(
+    "ID_PARQUET",
+    "ID_BATIMENT",
+    "ID_LOT",
+    "NOM_BATIMENT",          -- libellé du bâtiment (garder si vous voulez l’afficher)
+    "NOM_PARQUET",           -- libellé du parquet  (garder si vous voulez l’afficher)
+    "QUANTITE_AKOHO",
+    "SEXE",
+    "SANTE_MOYENNE",         -- moyenne de la colonne SANTE (ou juste SANTE si vous préférez)
+    "QUALITE",
+    "PRIX_UNITAIRE",         -- provient d'AS_INGREDIENTS (PUVENTE ou autre)
+    "PRIX_TOTAL"
+) AS
+SELECT
+    d."IDPARQUET"                                 AS ID_PARQUET,
+    d."IDBATIMENT"                                AS ID_BATIMENT,
+    lm."IDLOT"                                    AS ID_LOT,
+    bat."NOMBATIMENT"                             AS NOM_BATIMENT,
+    pqt."VAL"                                     AS NOM_PARQUET,
+    SUM(d."QTE")                                  AS QUANTITE_AKOHO,
+    sx."VAL"                                      AS SEXE,
+    AVG(d."SANTE")                                AS SANTE_MOYENNE,   -- si vous voulez la valeur brute, utilisez d."SANTE"
+    q."VAL"                                       AS QUALITE,
+    /* ----- Prix unitaire ----- */
+    NVL(ai."PU",0)                           AS PRIX_UNITAIRE,   -- <-- ADAPTEZ LE NOM DE LA COLONNE DE PRIX SI nécessaire
+    /* ----- Prix total ----- */
+    (SUM(d."QTE") * NVL(ai."PU",0))          AS PRIX_TOTAL
+FROM   "TRIAGEBATIMENTPARQUETDETAIL" d
+JOIN   "PARQUET" pqt              ON pqt."ID" = d."IDPARQUET"
+JOIN   "BATIMENT" bat             ON bat."ID" = d."IDBATIMENT"
+JOIN   "SEXE" sx                  ON sx."ID" = d."IDSEXE"
+JOIN   "QUALITEPOUSSIN" q         ON q."ID" = d."IDQUALITE"
+JOIN   "TRIAGEBATIMENTPARQUET" lm ON lm."ID" = d."IDMERE"           -- maître du lot
+JOIN   "LOT" lot                  ON lot."ID" = lm."IDLOT"           -- *** CORRECTION : lien via IDLOT ***
+LEFT JOIN "AS_INGREDIENTS" ai     ON ai."ID" = lot."IDARTICLE"       -- récupère le prix depuis AS_INGREDIENTS
+GROUP BY
+    d."IDPARQUET",
+    d."IDBATIMENT",
+    lm."IDLOT",
+    bat."NOMBATIMENT",
+    pqt."VAL",
+    sx."VAL",
+    q."VAL",
+    ai."PU";   -- même colonne que dans le SELECT

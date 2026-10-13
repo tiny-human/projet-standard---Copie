@@ -1,0 +1,51 @@
+# Fichiers sensibles et variables d'environnement
+.env
+.env.*
+!.env.example
+
+# Fichiers compilés Java
+*.class
+
+# Archives déployées ou générées
+*.war
+*.ear
+
+# Sorties de compilation et de déploiement
+/build-file/arbiochem_jar/
+/build-file/arbiochem_war/
+/build-file/${env.JBOSS_HOME}/
+/arbiochem-war/web/build/
+/arbiochem-war/web/dist/
+/arbiochem-war/web/plugins/*/dist/
+/codebar-generator/bin/
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+env/
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+
+# Fichiers système
+.DS_Store
+Thumbs.db
+
+# Logs et fichiers temporaires
+*.log
+*.tmp
+*.temp
+*.swp
+*~
+*.bak
+
+# Les bibliothèques .jar du projet sont volontairement conservées.
+# Ne pas ajouter une règle globale *.jar.
+/build-file/lib/lib.zip
