@@ -19,7 +19,7 @@
     pc.getChampByName("idIncubateurLib").setLibelle("Incubateur");
     pc.getChampByName("idResponsableLib").setLibelle("Responsable");
     pc.getChampByName("datemiseenmachine").setLibelle("Date de mise en machine");
-    pc.getChampByName("dateeclosionprevue").setLibelle("Date d'&eacute;closion pr&eacute;vue");
+    pc.getChampByName("dateeclosionprevue").setVisible(false);
     pc.getChampByName("temperateurcible").setLibelle("Temp&eacute;rature cible");
     pc.getChampByName("humiditecible").setLibelle("Humidit&eacute; cible");
     pc.getChampByName("heureprechauffage").setLibelle("Heure de pr&eacute;chauffage");
@@ -27,7 +27,7 @@
     pc.getChampByName("idincubateur").setVisible(false);
     pc.getChampByName("idresponsable").setVisible(false);
 
-    String[] ordre = {"id","idIncubateurLib","idResponsableLib","datemiseenmachine","dateeclosionprevue","temperateurcible","humiditecible","heureprechauffage","heuredebutincubation"};
+    String[] ordre = {"id","idIncubateurLib","idResponsableLib","datemiseenmachine","temperateurcible","humiditecible","heureprechauffage","heuredebutincubation"};
     pc.setOrdre(ordre);
 
     String pageActuel = "ferme/couvoir/miseneincubateur-fiche.jsp";

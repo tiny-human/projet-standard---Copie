@@ -8,6 +8,8 @@ import java.sql.Connection;
  * @author Safidy
  */
 public class Souche extends TypeObjet {
+    private int incubation;
+
     public Souche() {
         super.setNomTable("souche");
     }
@@ -17,5 +19,13 @@ public class Souche extends TypeObjet {
         super.setNomTable("souche");
         this.preparePk("SOU", "GETSEQSOUCHE");
         this.setId(this.makePK(c));
+    }
+
+    public int getIncubation(){
+        return incubation;
+    }
+
+    public void setIncubation(int incubation){
+        this.incubation = incubation;
     }
 }

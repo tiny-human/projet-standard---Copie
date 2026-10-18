@@ -33,7 +33,7 @@
     pi.getFormu().changerEnChamp(liste);
 
     pi.getFormu().getChamp("datemiseenmachine").setLibelle("Date de mise en machine");
-    pi.getFormu().getChamp("dateeclosionprevue").setLibelle("Date d'&eacute;closion pr&eacute;vue");
+    pi.getFormu().getChamp("dateeclosionprevue").setVisible(false);
     pi.getFormu().getChamp("idincubateur").setLibelle("Incubateur");
     pi.getFormu().getChamp("idresponsable").setLibelle("Responsable");
     pi.getFormu().getChamp("temperateurcible").setLibelle("Temp&eacute;rature cible");
@@ -59,12 +59,14 @@
     pi.getFormufle().getChamp("heuredemarrage_0").setLibelle("Heure de d&eacute;marrage");
     pi.getFormufle().getChamp("heurefin_0").setLibelle("Heure de fin");
     pi.getFormufle().getChamp("dateponte_0").setLibelle("Date de ponte");
+    pi.getFormufle().getChamp("dateeclosionprevue_0").setLibelle("Date d'&eacute;closion pr&eacute;vue");
     pi.getFormufle().getChamp("qte_0").setLibelle("Quantit&eacute;");
     pi.getFormufle().getChamp("poidsmoyen_0").setLibelle("Poids moyen");
     Champ.setVisible(pi.getFormufle().getChampMulitple("idmere").getListeChamp(),false);
     Champ.setPageAppelComplete(pi.getFormufle().getChampFille("idlot"),"ferme.lot.Lot","id","LOT","id","id");
 
-    String[] colOrdre = {"idlot","idbatiment","idparquet","heuredemarrage","heurefin","dateponte","qte","poidsmoyen"};
+
+    String[] colOrdre = {"idlot","idbatiment","idparquet","heuredemarrage","heurefin","dateponte","dateeclosionprevue","qte","poidsmoyen"};
     pi.getFormufle().setColOrdre(colOrdre);
 
     String acte = request.getParameter("acte");
@@ -94,6 +96,149 @@
     </form>
 </div>
 
+<script>
+(function () {
+    var nombreLignes = <%=taille%>;
+    var contexte = "<%=request.getContextPath()%>";
+
+    var champDateMise = document.getElementById(
+        "datemiseenmachine"
+    );
+
+    function recupererChampLot(index) {
+        return document.getElementById(
+            "idlot_" + index
+        );
+    }
+
+    function recupererChampDateEclosion(index) {
+        return document.getElementById(
+            "dateeclosionprevue_" + index
+        );
+    }
+
+    function formaterDate(date) {
+        var annee = date.getFullYear();
+
+        var mois = String(
+            date.getMonth() + 1
+        ).padStart(2, "0");
+
+        var jour = String(
+            date.getDate()
+        ).padStart(2, "0");
+
+        return annee + "-" + mois + "-" + jour;
+    }
+
+    function calculerPourUneLigne(index) {
+        var champLot = recupererChampLot(index);
+        var champDateEclosion =
+            recupererChampDateEclosion(index);
+
+        if (!champLot || !champDateEclosion) {
+            return;
+        }
+
+        champDateEclosion.readOnly = true;
+        champDateEclosion.value = "";
+
+        if (
+            !champDateMise ||
+            champDateMise.value === "" ||
+            champLot.value === ""
+        ) {
+            return;
+        }
+
+        var url =
+            contexte +
+            "/IncubationLotServlet?idLot=" +
+            encodeURIComponent(champLot.value);
+
+        fetch(url)
+            .then(function (response) {
+                if (!response.ok) {
+                    throw new Error(
+                        "Impossible de récupérer l'incubation du lot."
+                    );
+                }
+
+                return response.json();
+            })
+            .then(function (donnees) {
+                var dateMise = new Date(
+                    champDateMise.value + "T00:00:00"
+                );
+
+                if (
+                    Number.isNaN(dateMise.getTime()) ||
+                    !Number.isInteger(donnees.incubation) ||
+                    donnees.incubation <= 0
+                ) {
+                    throw new Error(
+                        "La date de mise ou l'incubation est invalide."
+                    );
+                }
+
+                dateMise.setDate(
+                    dateMise.getDate() +
+                    donnees.incubation
+                );
+
+                champDateEclosion.value =
+                    formaterDate(dateMise);
+            })
+            .catch(function (erreur) {
+                champDateEclosion.value = "";
+                window.alert(erreur.message);
+            });
+    }
+
+    function recalculerToutesLesLignes() {
+        for (
+            var index = 0;
+            index < nombreLignes;
+            index++
+        ) {
+            calculerPourUneLigne(index);
+        }
+    }
+
+    function initialiserFormulaire() {
+        if (champDateMise) {
+            champDateMise.addEventListener(
+                "change",
+                recalculerToutesLesLignes
+            );
+        }
+
+        for (
+            var index = 0;
+            index < nombreLignes;
+            index++
+        ) {
+            var champLot = recupererChampLot(index);
+
+            if (champLot) {
+                champLot.addEventListener(
+                    "change",
+                    (function (ligne) {
+                        return function () {
+                            calculerPourUneLigne(ligne);
+                        };
+                    })(index)
+                );
+            }
+        }
+
+        recalculerToutesLesLignes();
+    }
+
+    initialiserFormulaire();
+})();
+</script>
+
 <% } catch (Exception e) {
   e.printStackTrace();
 %>
@@ -101,4 +246,3 @@
     history.back();
 </script>
 <% }%>
-

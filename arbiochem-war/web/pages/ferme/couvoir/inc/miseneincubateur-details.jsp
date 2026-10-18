@@ -7,7 +7,19 @@
     o.setNomTable("MISEENINCUBATEURDETAIL_LIB");
     String[] listeCrt = {};
     String[] listeInt = {};
-    String[] libEntete = {"id","idLotLib","idBatimentLib","idParquetLib","heuredemarrage","heurefin","dateponte","qte","poidsmoyen"};
+
+String[] libEntete = {
+    "id",
+    "idLotLib",
+    "idBatimentLib",
+    "idParquetLib",
+    "heuredemarrage",
+    "heurefin",
+    "dateponte",
+    "dateeclosionprevue",
+    "qte",
+    "poidsmoyen"
+};
     PageRecherche pr = new PageRecherche(o, request, listeCrt, listeInt, 4, libEntete, libEntete.length);
     pr.setUtilisateur((user.UserEJB) session.getValue("u"));
     pr.setLien((String) session.getValue("lien"));
@@ -19,7 +31,19 @@
     String[] colSomme = null;
     pr.creerObjetPage(libEntete, colSomme);
 
-    String[] libEnteteAffiche = {"Id","Lot","B&acirc;timent","Parquet","Heure de d&eacute;marrage","Heure de fin","Date de ponte","Quantit&eacute;","Poids moyen"};
+String[] libEnteteAffiche = {
+    "Id",
+    "Lot",
+    "B&acirc;timent",
+    "Parquet",
+    "Heure de d&eacute;marrage",
+    "Heure de fin",
+    "Date de ponte",
+    "Date d'&eacute;closion pr&eacute;vue",
+    "Quantit&eacute;",
+    "Poids moyen"
+};
+   
     pr.getTableau().setLibelleAffiche(libEnteteAffiche);
 %>
 
