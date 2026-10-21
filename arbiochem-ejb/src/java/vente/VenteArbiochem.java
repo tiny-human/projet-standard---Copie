@@ -56,6 +56,32 @@ public class VenteArbiochem extends Vente{
         throw new Exception("Le client n'existe pas");
     }
 
+    public double getSoldeAvoirClient(Connection c, String idClient)throws SQLException, Exception{
+        boolean estOuvert = false;
+        double soldeAvoir = 0.0;
+        if(c==null){
+            c = new UtilDB().GetConn();
+            estOuvert = true;
+        }try {
+            // String idVente = vente.getId();
+            AvoirFCLib t = new AvoirFCLib();
+            t.setNomTable("AVOIRFCLIB_CPL");
+            AvoirFCLib[] details = (AvoirFCLib[]) CGenUtil.rechercher(t,null,null,c," AND idClient='"+idClient+"' and resteapayerar > 0 order by id asc");
+            if(details.length>0){
+                for(int i=0;i<details.length;i++){
+                        soldeAvoir += details[i].getResteapayerar();
+                }
+            }else {
+                return 0.0;
+            }
+         } catch (Exception e) {
+            if(estOuvert) c.rollback();
+            throw e ;
+        } finally {
+            if(estOuvert) c.close();
+        }
+        return soldeAvoir;
+    }
 
     public LiaisonPaiement genererPaiementFactureParAvoirAutom(String u, Connection c,VenteLib vente) throws SQLException, Exception{
         LiaisonPaiement pFacture = null;

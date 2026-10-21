@@ -21,6 +21,23 @@
 <%@ page import="magasin.Magasin" %>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%
+    String onchanged = request.getParameter("onchanged");
+    double soldeAvoir = 0.0;
+    if("true".equals(onchanged)){
+        String idClient = request.getParameter("idClient");
+        if(!idClient.isEmpty() && idClient != null){
+            Connection c = null;
+            try{
+                c = new UtilDB().getConn();
+                soldeAvoir = getSoldeAvoirClient(c,idClient);
+            }catch(Exception e){
+                e.printStackTrace();
+            }finally{
+                if(c != null) c.close();
+            }
+        }
+    }
+
     boolean carteExpiree = false;
     try {
         UserEJB u = null;
@@ -354,6 +371,10 @@
                     <%
                         out.println(pi.getFormufle().getHtmlTableauInsert());
                     %>
+                    <div class="form-group">
+                        <label>Solde de l'avoir :</label>
+                        <input type="text" name="soldeAvoir" value="<%= soldeAvoir %>" readonly class="form-control" />
+                    </div>
                 </div>
 
             <input name="acte" type="hidden" id="nature" value="insert">
